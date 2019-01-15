@@ -4,6 +4,16 @@ module.exports = {
     },
 
     /**
+     * Returns a random integer between min and max
+     * @private
+     * @param {Number} min Min value for the random number
+     * @param {Number} max Max value for the random number
+     */
+    randomMinMax: function (min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+
+    /**
      * A simple forEach() implementation for Arrays, Objects and NodeLists
      * @private
      * @param {Array|Object|NodeList} collection Collection of items to iterate

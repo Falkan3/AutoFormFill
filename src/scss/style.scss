@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css?family=Nunito:300,400,700&subset=latin-ext');
+
+body {
+	font-family: 'Nunito', sans-serif;
+	line-height: 1.4;
+}
+
+.section {
+	padding: 4rem 0;
+}
+
+.logo {
+	text-align: center;
+
+	&__img {
+		display: inline-block;
+		width: 6rem;
+		max-width: 100%;
+		height: auto;
+		margin: 0.5rem 0;
+	}
+
+	&__title {
+		margin: 0.5rem 0;
+		font-size: 2rem;
+		font-weight: 700;
+
+		&--highlighted {
+			display: inline-block;
+			padding: 0.2rem 1rem;
+			background: #1878dd;
+			color: #fff;
+			border-radius: 8px;
+		}
+	}
+}
+
+.form-container {
+	padding: 2rem 0;
+}

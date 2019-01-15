@@ -7,9 +7,15 @@
 	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0">
 
 	<!-- Favicon -->
-
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/site.webmanifest">
+	<meta name="msapplication-TileColor" content="#2b5797">
+	<meta name="theme-color" content="#ffffff">
 	<!-- /Favicon -->
 
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" media="all">
 	<!--<link href="https://fonts.googleapis.com/css?family=K2D:400,700|Krub:300,400,700&amp;subset=latin-ext" rel="stylesheet">-->
 
 	<!-- ====== AFF dependencies ====== -->
@@ -45,20 +51,69 @@
 	}
 </style>
 
+<div class="container">
+	<section class="section">
+		<div class="logo">
+			<img src="../src/img/form.svg" class="logo__img" alt="Form fill" />
+			<p class="logo__title"><span class="logo__title--highlighted">AutoFormFill</span> demo</p>
+		</div>
+
+		<div class="form-container">
+			<form action="#" method="post">
+				<div class="form-group">
+					<label for="input-1">Name</label>
+					<input type="email" class="form-control" id="input-1" aria-describedby="emailHelp" placeholder="Enter name">
+				</div>
+				<div class="form-group">
+					<label for="input-2">Email</label>
+					<input type="email" class="form-control" id="input-2" aria-describedby="emailHelp" placeholder="Enter email">
+					<small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+				</div>
+				<div class="form-group">
+					<label for="input-3">Message</label>
+					<textarea class="form-control" id="input-3"></textarea>
+				</div>
+				<button type="submit" class="btn btn-primary">Submit</button>
+				<button id="aff-trigger" type="button" class="btn btn-secondary">Fill with AutoFormFiller</button>
+			</form>
+		</div>
+	</section>
+</div>
+
 <script type="text/javascript">
     // DOM loaded event listener, can be placed anywhere, will fire when DOM is loaded and ready
     document.addEventListener("DOMContentLoaded", function (event) {
         // Your code to run since DOM is loaded and ready
 
         const AFFSettings = {
-
+			inputs: [
+				{
+                    element: document.querySelector('#input-1'),
+					value: 'Jan'
+				},
+                {
+                    element: document.querySelector('#input-2'),
+                    value: 'jan.kowalski@email.com'
+                },
+                {
+                    element: document.querySelector('#input-3'),
+                    value: 'Hello world'
+                }
+			]
 		};
 
-        // try {
+        try {
             AFF.init(AFFSettings);
-        // } catch (ex) {
-        //     console.log('AFF init error');
-        // }
+        } catch (ex) {
+            console.log('AFF init error');
+        }
+
+        function runAFF() {
+            console.log('Running AFF...');
+            AFF.inputsFillIn();
+		}
+
+        document.querySelector('#aff-trigger').addEventListener('click', runAFF);
     });
 
     // self executing function, must be placed just before the closing body tag
