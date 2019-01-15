@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>AutoFormFill test page</title>
+
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0">
+
+	<!-- Favicon -->
+
+	<!-- /Favicon -->
+
+	<!--<link href="https://fonts.googleapis.com/css?family=K2D:400,700|Krub:300,400,700&amp;subset=latin-ext" rel="stylesheet">-->
+
+	<!-- ====== AFF dependencies ====== -->
+
+	<!-- ====== AFF plugin main css file ====== -->
+	<link href="../dist/css/style.css" rel="stylesheet" type="text/css" media="all">
+	<!-- ====== AFF plugin main js file ====== -->
+
+	<script type="text/javascript" src="../dist/js/bundle.js"></script>
+</head>
+<body>
+<style type="text/css">
+	html {
+		font-size: 14px;
+	}
+
+	@media only screen and (max-width: 1399px) {
+		html {
+			font-size: 13px;
+		}
+	}
+
+	@media only screen and (max-width: 1199px) {
+		html {
+			font-size: 12px;
+		}
+	}
+
+	@media only screen and (max-width: 767px) {
+		html {
+			font-size: 11px;
+		}
+	}
+</style>
+
+<script type="text/javascript">
+    // DOM loaded event listener, can be placed anywhere, will fire when DOM is loaded and ready
+    document.addEventListener("DOMContentLoaded", function (event) {
+        // Your code to run since DOM is loaded and ready
+
+        const AFFSettings = {
+
+		};
+
+        // try {
+            AFF.init(AFFSettings);
+        // } catch (ex) {
+        //     console.log('AFF init error');
+        // }
+    });
+
+    // self executing function, must be placed just before the closing body tag
+    (function () {
+        // AFF.init();
+    })();
+</script>
+</body>
+</html>
