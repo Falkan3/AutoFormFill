@@ -271,7 +271,11 @@
                 // Fill in only if DOM element exists
                 if (item.element) {
                     if (settings.typing.clearOnInit) {
-                        item.element.value = '';
+                        if(item.type === 'checkbox' || item.type === 'radio') {
+                            item.element.checked = false;
+                        } else {
+                            item.element.value = '';
+                        }
                     }
                 }
             });
@@ -296,7 +300,11 @@
                 const item = settings.inputs[id];
                 if (item) {
                     if (settings.typing.clearOnInit) {
-                        item.element.value = '';
+                        if(item.type === 'checkbox' || item.type === 'radio') {
+                            item.element.checked = false;
+                        } else {
+                            item.element.value = '';
+                        }
                     }
 
                     // Initialize typing
@@ -381,15 +389,6 @@
                     return false;
                 }
             }
-            // finished
-            else {
-                AFF.resetInputTypingState(false);
-
-                // On FillInEnd callback
-                AFF.callbackCall('FillInEnd');
-
-                return false;
-            }
         }
         // the element given is not a valid input
         else {
@@ -411,7 +410,7 @@
             try {
                 // for inputs of text and textarea type
                 if (item.type === 'text' || item.type === 'textarea') {
-                    const characterLastIndex = item.value.length - 1;
+                    const characterLastIndex = (item.value.length - 1) || 0;
                     // Character is not last
                     if (characterAt <= characterLastIndex) {
                         // set pause to 0 for first character
@@ -439,6 +438,8 @@
                 else if (item.type === 'checkbox' || item.type === 'radio') {
                     let value = !!item.value;
 
+                    item.element.focus();
+
                     settings.typing.state.typingTimeoutNo = setTimeout(function () {
                         item.element.checked = value;
 
@@ -450,10 +451,16 @@
                 // for selects
                 else if (item.type === 'select') {
                     // item.element.value = item.value;
-                    const characterLastIndex = item.value.length - 1;
+                    const characterLastIndex = (item.value.length - 1) || 0;
 
                     // Character is not last
                     if (characterAt <= characterLastIndex) {
+                        // set pause to 0 for first character
+                        if (characterAt === 0) {
+                            settings.typing.state.nextPause = 0;
+                            item.element.focus();
+                        }
+
                         const options = item.element.getElementsByTagName('option');
                         const value = AFF.helpers.isArray(item.value) ? item.value[characterAt] : item.value;
                         let optionToSelect;
