@@ -36,9 +36,11 @@
     // Default settings
     const defaults = {
         initClass: 'js-AFF',
+        form: null,
         inputs: [],
         typing: {
             clearOnInit: true,
+            submitOnFinish: false,
             autoFillNext: true,
             strokeInterval: 100, // time between keystrokes in miliseconds
             strokeIntervalVariation: 50, // random variation in base stroke interval, e.g. setting this value to 15 will result in stroke intervals taking between 35-65 ms
@@ -57,7 +59,9 @@
         templates: {
             input: {
                 element: null, // DOM input element
+                type: null,
                 value: 'test value', // text to be typed into the input element
+                valueMultipleCharacters: false,
                 typing: {
                     strokeInterval: null, // override default stroke interval (for this element) with this value
                     strokeIntervalVariation: null // override default stroke interval variation (for this element) with this value
@@ -68,7 +72,7 @@
         callbackOnInit: function () {
 
         },
-        callbackOnFillInEnd: function() {
+        callbackOnFillInEnd: function () {
 
         },
         callbackOnInitArray: [
@@ -81,10 +85,21 @@
         ],
         callbackOnFillInEndArray: [
             function () {
-                console.log('FillInEnd function callback array 1');
-            },
-            function () {
-                console.log('FillInEnd function callback array 2');
+                console.log('Callback FillInEnd');
+
+                if (settings.typing.submitOnFinish) {
+                    if (settings.form) {
+                        const focusInterval = settings.typing.focusInterval;
+                        const focusIntervalVariation = settings.typing.focusIntervalVariation;
+                        const timeout = AFF.helpers.randomMinMax(focusInterval - focusIntervalVariation, focusInterval + focusIntervalVariation);
+
+                        setTimeout(function () {
+                            settings.form.submit();
+                        }, timeout);
+                    } else {
+                        console.log('No form to submit.');
+                    }
+                }
             },
         ],
     };
@@ -208,7 +223,27 @@
      */
     AFF.initInputs = function () {
         AFF.helpers.forEach(settings.inputs, function (item, i) {
-            settings.inputs[i] = AFF.helpers.extend(settings.templates.input, item);
+            const updatedItem = AFF.helpers.extend(settings.templates.input, item);
+
+            if (updatedItem.element) {
+                if (updatedItem.element.tagName == "INPUT") {
+                    if (updatedItem.element.type == "text" || updatedItem.element.type == "email" || updatedItem.element.type == "tel" || updatedItem.element.type == "password") {
+                        updatedItem.type = 'text';
+                    } else if (updatedItem.element.type == "checkbox") {
+                        updatedItem.type = 'checkbox';
+                    } else if (updatedItem.element.type == "radio") {
+                        updatedItem.type = 'radio';
+                    }
+                } else if (updatedItem.element.tagName == "TEXTAREA") {
+                    updatedItem.type = 'textarea';
+                } else if (item.element.tagName == "SELECT") {
+                    updatedItem.type = 'select';
+                }
+            }
+
+            updatedItem.valueMultipleCharacters = AFF.helpers.isArrayOrString(updatedItem.value);
+
+            settings.inputs[i] = AFF.helpers.extend(settings.inputs[i], updatedItem);
         });
     };
 
@@ -219,7 +254,7 @@
     AFF.resetInputTypingState = function (inProgress) {
         settings.typing.state.inProgress = !!inProgress;
         settings.typing.state.nextCharAt = 0;
-        if(!settings.typing.state.inProgress) {
+        if (!settings.typing.state.inProgress) {
             settings.typing.state.currentInputIndex = 0;
         }
     };
@@ -235,7 +270,7 @@
             AFF.helpers.forEach(settings.inputs, function (item, i) {
                 // Fill in only if DOM element exists
                 if (item.element) {
-                    if(settings.typing.clearOnInit) {
+                    if (settings.typing.clearOnInit) {
                         item.element.value = '';
                     }
                 }
@@ -260,7 +295,7 @@
             else {
                 const item = settings.inputs[id];
                 if (item) {
-                    if(settings.typing.clearOnInit) {
+                    if (settings.typing.clearOnInit) {
                         item.element.value = '';
                     }
 
@@ -279,48 +314,64 @@
      * @private
      */
     AFF.inputFillInCharCallback = function (item, characterAt) {
-        const characterLastIndex = item.value.length - 1;
+        const multipleCharacters = item.valueMultipleCharacters;
+        const characterLastIndex = multipleCharacters ? item.value.length - 1 : 0;
 
         // Filling in progress
-        if(settings.typing.state.nextCharAt <= characterLastIndex) {
-            let strokeInterval = settings.typing.strokeInterval;
-            let strokeIntervalVariation = settings.typing.strokeIntervalVariation;
+        // for inputs of text and textarea type
+        if (item.type === 'text' || item.type === 'textarea' || item.type === 'select' || item.type === 'checkbox') {
+            if (multipleCharacters && settings.typing.state.nextCharAt <= characterLastIndex) {
+                let strokeInterval = settings.typing.strokeInterval;
+                let strokeIntervalVariation = settings.typing.strokeIntervalVariation;
 
-            // Customize settings for input
-            if (item.typing.strokeInterval !== null && !isNaN(item.typing.strokeInterval)) {
-                strokeInterval = item.typing.strokeInterval;
-            }
-            if (item.typing.strokeIntervalVariation !== null && !isNaN(item.typing.strokeIntervalVariation)) {
-                strokeIntervalVariation = item.typing.strokeIntervalVariation;
-            }
-
-            characterAt++;
-            settings.typing.state.nextCharAt = characterAt;
-            settings.typing.state.nextPause = AFF.helpers.randomMinMax(strokeInterval - strokeIntervalVariation, strokeInterval + strokeIntervalVariation);
-
-            AFF.inputFillInChar(item, characterAt);
-            return true;
-        }
-        // Finished filling current input
-        else {
-            settings.typing.state.currentInputIndex++;
-
-            // if auto fill next is set to true, filling the next input will begin immediately
-            if(settings.typing.autoFillNext) {
-                const nextItem = settings.inputs[settings.typing.state.currentInputIndex];
-                if (nextItem) {
-                    let focusInterval = settings.typing.focusInterval;
-                    let focusIntervalVariation = settings.typing.focusIntervalVariation;
-                    settings.typing.state.nextPause = AFF.helpers.randomMinMax(focusInterval - focusIntervalVariation, focusInterval + focusIntervalVariation);
-
-                    AFF.resetInputTypingState(true);
-
-                    settings.typing.state.typingTimeoutNo = setTimeout(function () {
-                        AFF.inputFillInChar(nextItem, settings.typing.state.nextCharAt);
-                    }, settings.typing.state.nextPause);
-                    return true;
+                // Customize settings for input
+                if (item.typing.strokeInterval !== null && !isNaN(item.typing.strokeInterval)) {
+                    strokeInterval = item.typing.strokeInterval;
                 }
-                // No next input
+                if (item.typing.strokeIntervalVariation !== null && !isNaN(item.typing.strokeIntervalVariation)) {
+                    strokeIntervalVariation = item.typing.strokeIntervalVariation;
+                }
+
+                characterAt++;
+                settings.typing.state.nextCharAt = characterAt;
+                settings.typing.state.nextPause = AFF.helpers.randomMinMax(strokeInterval - strokeIntervalVariation, strokeInterval + strokeIntervalVariation);
+
+                AFF.inputFillInChar(item, characterAt);
+                return true;
+            }
+        }
+        // For inputs of checkbox and radio type or Finished filling current input
+        if ((item.type === 'select' || item.type === 'checkbox' || item.type === 'radio') || (multipleCharacters && settings.typing.state.nextCharAt > characterLastIndex)) {
+            // if select, check if all values have been selected
+            if (!multipleCharacters || (multipleCharacters && settings.typing.state.nextCharAt > characterLastIndex)) {
+                settings.typing.state.currentInputIndex++;
+
+                // if auto fill next is set to true, filling the next input will begin immediately
+                if (settings.typing.autoFillNext) {
+                    const nextItem = settings.inputs[settings.typing.state.currentInputIndex];
+                    if (nextItem) {
+                        let focusInterval = settings.typing.focusInterval;
+                        let focusIntervalVariation = settings.typing.focusIntervalVariation;
+                        settings.typing.state.nextPause = AFF.helpers.randomMinMax(focusInterval - focusIntervalVariation, focusInterval + focusIntervalVariation);
+
+                        AFF.resetInputTypingState(true);
+
+                        settings.typing.state.typingTimeoutNo = setTimeout(function () {
+                            AFF.inputFillInChar(nextItem, settings.typing.state.nextCharAt);
+                        }, settings.typing.state.nextPause);
+                        return true;
+                    }
+                    // No next input
+                    else {
+                        AFF.resetInputTypingState(false);
+
+                        // On FillInEnd callback
+                        AFF.callbackCall('FillInEnd');
+
+                        return false;
+                    }
+                }
+                // if auto fill next is false, stop the process
                 else {
                     AFF.resetInputTypingState(false);
 
@@ -330,7 +381,7 @@
                     return false;
                 }
             }
-            // if auto fill next is false, stop the process
+            // finished
             else {
                 AFF.resetInputTypingState(false);
 
@@ -340,8 +391,17 @@
                 return false;
             }
         }
+        // the element given is not a valid input
+        else {
+            AFF.resetInputTypingState(false);
+
+            // On FillInEnd callback
+            AFF.callbackCall('FillInEnd');
+
+            return false;
+        }
     };
-    
+
     /**
      * Fill in a character in an input element
      * @private
@@ -349,26 +409,107 @@
     AFF.inputFillInChar = function (item, characterAt) {
         if (typeof characterAt !== "undefined" && !isNaN(characterAt)) {
             try {
-                const characterLastIndex = item.value.length - 1;
-                // Character is not last
-                if (characterAt <= characterLastIndex) {
-                    // set pause to 0 for first character
-                    if(characterAt === 0) {
-                        settings.typing.state.nextPause = 0;
-                        item.element.focus();
-                    }
+                // for inputs of text and textarea type
+                if (item.type === 'text' || item.type === 'textarea') {
+                    const characterLastIndex = item.value.length - 1;
+                    // Character is not last
+                    if (characterAt <= characterLastIndex) {
+                        // set pause to 0 for first character
+                        if (characterAt === 0) {
+                            settings.typing.state.nextPause = 0;
+                            item.element.focus();
+                        }
 
-                    let character = item.value[characterAt];
+                        let character = item.value[characterAt];
+
+                        settings.typing.state.typingTimeoutNo = setTimeout(function () {
+                            item.element.value = item.element.value + character;
+
+                            AFF.inputFillInCharCallback(item, characterAt);
+                        }, settings.typing.state.nextPause);
+
+                        return true;
+                    }
+                    // Typing finished
+                    else {
+                        return AFF.inputFillInCharCallback(item, characterAt);
+                    }
+                }
+                // for inputs of checkbox and radio type
+                else if (item.type === 'checkbox' || item.type === 'radio') {
+                    let value = !!item.value;
 
                     settings.typing.state.typingTimeoutNo = setTimeout(function () {
-                        item.element.value = item.element.value + character;
+                        item.element.checked = value;
 
                         AFF.inputFillInCharCallback(item, characterAt);
                     }, settings.typing.state.nextPause);
 
                     return true;
                 }
-                // Typing finished
+                // for selects
+                else if (item.type === 'select') {
+                    // item.element.value = item.value;
+                    const characterLastIndex = item.value.length - 1;
+
+                    // Character is not last
+                    if (characterAt <= characterLastIndex) {
+                        const options = item.element.getElementsByTagName('option');
+                        const value = AFF.helpers.isArray(item.value) ? item.value[characterAt] : item.value;
+                        let optionToSelect;
+                        for (let i = 0; i < options.length; i++) {
+                            if (options[i].value == value) {
+                                optionToSelect = i;
+                                break;
+                            }
+                        }
+
+                        if (typeof options[optionToSelect] !== "undefined") {
+                            settings.typing.state.typingTimeoutNo = setTimeout(function () {
+                                const option = options[optionToSelect];
+                                option.selected = true;
+
+                                AFF.inputFillInCharCallback(item, characterAt);
+                            }, settings.typing.state.nextPause);
+                        } else {
+                            console.log(`Select option ${optionToSelect} doesn't exist.`);
+
+                            settings.typing.state.typingTimeoutNo = setTimeout(function () {
+                                AFF.inputFillInCharCallback(item, characterAt);
+                            }, settings.typing.state.nextPause);
+
+                            return false;
+                        }
+
+                        /*
+                        // for multiple values
+                        if (AFF.helpers.isArray(item.value)) {
+                            for (let i = 0, l = options.length, o; i < options.length - 1; i++) {
+                                o = options[i];
+                                if (item.value.indexOf(parseInt(o.value)) != -1) {
+                                    settings.typing.state.typingTimeoutNo = setTimeout(function () {
+                                        o.selected = true; // 'selected'
+
+                                        AFF.inputFillInCharCallback(item, characterAt);
+                                    }, settings.typing.state.nextPause);
+                                }
+                            }
+                        }
+                        // for single value
+                        else {
+                            if (options.indexOf(parseInt(item.value)) != -1) {
+                                const option = item.element.getElementsByTagName('option')[item.value];
+                                option.selected = true;
+                            }
+                        }
+                        */
+                    }
+                    // Typing finished
+                    else {
+                        return AFF.inputFillInCharCallback(item, characterAt);
+                    }
+                }
+                // invalid input type
                 else {
                     return AFF.inputFillInCharCallback(item, characterAt);
                 }

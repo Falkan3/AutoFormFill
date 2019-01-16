@@ -117,6 +117,16 @@ module.exports = {
     },
 
     /**
+     * Check if an item is an array or a string
+     * @private
+     * @param {Object|Array|String} item The item to be checked
+     * @returns {Boolean}
+     */
+    isArrayOrString: function (item) {
+        return (item && (Array.isArray(item) || typeof item === "string"));
+    },
+
+    /**
      * Merge defaults with user options
      * @private
      * @param {Object} target Object to be extended
@@ -136,6 +146,8 @@ module.exports = {
                     Object.assign(output, {[key]: source[key]});
                 }
             });
+        } else {
+            output = source;
         }
         return output;
     },

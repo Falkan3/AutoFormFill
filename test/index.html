@@ -59,20 +59,35 @@
 		</div>
 
 		<div class="form-container">
-			<form action="#" method="post">
+			<form id="form-1" action="#" method="post">
 				<div class="form-group">
 					<label for="input-1">Name</label>
-					<input type="email" class="form-control" id="input-1" aria-describedby="emailHelp" placeholder="Enter name">
+					<input id="input-1" type="email" class="form-control" aria-describedby="emailHelp" placeholder="Enter name" />
 				</div>
 				<div class="form-group">
 					<label for="input-2">Email</label>
-					<input type="email" class="form-control" id="input-2" aria-describedby="emailHelp" placeholder="Enter email">
+					<input id="input-2" type="email" class="form-control" aria-describedby="emailHelp" placeholder="Enter email" />
 					<small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
 				</div>
 				<div class="form-group">
 					<label for="input-3">Message</label>
-					<textarea class="form-control" id="input-3"></textarea>
+					<textarea id="input-3" class="form-control"></textarea>
 				</div>
+				<div class="form-group">
+					<label for="select-1">Example select</label>
+					<select id="select-1" class="form-control" multiple>
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="3">3</option>
+						<option value="4">4</option>
+						<option value="5">5</option>
+					</select>
+				</div>
+				<div class="form-check">
+					<input id="checkbox-1" type="checkbox" class="form-check-input" />
+					<label class="form-check-label" for="checkbox-1">Check me out</label>
+				</div>
+
 				<button type="submit" class="btn btn-primary">Submit</button>
 				<button id="aff-trigger" type="button" class="btn btn-secondary">Fill with AutoFormFiller</button>
 			</form>
@@ -86,11 +101,12 @@
         // Your code to run since DOM is loaded and ready
 
         const AFFSettings = {
-			inputs: [
-				{
+            form: document.querySelector('#form-1'),
+            inputs: [
+                {
                     element: document.querySelector('#input-1'),
-					value: 'Jan'
-				},
+                    value: 'Jan'
+                },
                 {
                     element: document.querySelector('#input-2'),
                     value: 'jan.kowalski@email.com'
@@ -98,9 +114,20 @@
                 {
                     element: document.querySelector('#input-3'),
                     value: 'Hello world'
-                }
-			]
-		};
+                },
+                {
+                    element: document.querySelector('#select-1'),
+                    value: [2,5]
+                },
+                {
+                    element: document.querySelector('#checkbox-1'),
+                    value: true
+                },
+            ],
+            typing: {
+                submitOnFinish: false
+            }
+        };
 
         try {
             AFF.init(AFFSettings);
@@ -111,7 +138,7 @@
         function runAFF() {
             console.log('Running AFF...');
             AFF.inputsFillIn();
-		}
+        }
 
         document.querySelector('#aff-trigger').addEventListener('click', runAFF);
     });
