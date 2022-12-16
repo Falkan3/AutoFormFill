@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>AutoFormFill test page</title>
+
+	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0">
+
+	<!-- Favicon -->
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/site.webmanifest">
+	<meta name="msapplication-TileColor" content="#2b5797">
+	<meta name="theme-color" content="#ffffff">
+	<!-- /Favicon -->
+
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" rel="stylesheet" type="text/css" media="all">
+	<!--<link href="https://fonts.googleapis.com/css?family=K2D:400,700|Krub:300,400,700&amp;subset=latin-ext" rel="stylesheet">-->
+
+	<!-- ====== AFF dependencies ====== -->
+
+	<!-- ====== AFF plugin main css file ====== -->
+	<link href="/dist/css/style.css" rel="stylesheet" type="text/css" media="all">
+	<!-- ====== AFF plugin main js file ====== -->
+
+	<script type="text/javascript" src="/dist/js/bundle.js"></script>
+</head>
+<body>
+<style type="text/css">
+	html {
+		font-size: 14px;
+	}
+
+	@media only screen and (max-width: 1399px) {
+		html {
+			font-size: 13px;
+		}
+	}
+
+	@media only screen and (max-width: 1199px) {
+		html {
+			font-size: 12px;
+		}
+	}
+
+	@media only screen and (max-width: 767px) {
+		html {
+			font-size: 11px;
+		}
+	}
+</style>
+
+<div class="container">
+	<section class="section">
+		<div class="logo">
+			<img src="../src/img/form.svg" class="logo__img" alt="Form fill" />
+			<p class="logo__title"><span class="logo__title--highlighted">AutoFormFill</span> demo</p>
+		</div>
+
+		<div class="form-container">
+			<form id="form-1" action="#" method="post">
+				<div class="form-group">
+					<label for="input-1">Name</label>
+					<input id="input-1" type="text" class="form-control" aria-describedby="emailHelp" placeholder="Enter name" />
+				</div>
+				<div class="form-group">
+					<label for="input-2">Email</label>
+					<input id="input-2" type="email" class="form-control" aria-describedby="emailHelp" placeholder="Enter email" />
+					<small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+				</div>
+				<div class="form-group">
+					<label for="input-3">Message</label>
+					<textarea id="input-3" class="form-control"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="select-1">Example select</label>
+					<select id="select-1" class="form-control" multiple>
+						<option value="1">1</option>
+						<option value="2">2</option>
+						<option value="3">3</option>
+						<option value="4">4</option>
+						<option value="5">5</option>
+					</select>
+				</div>
+				<div class="form-check">
+					<input id="checkbox-1" type="checkbox" class="form-check-input" />
+					<label class="form-check-label" for="checkbox-1">Check me out</label>
+				</div>
+
+				<button type="submit" class="btn btn-primary">Submit</button>
+				<button id="aff-trigger" type="button" class="btn btn-secondary">Fill with AutoFormFiller</button>
+			</form>
+		</div>
+	</section>
+</div>
+
+<script type="text/javascript">
+    // DOM loaded event listener, can be placed anywhere, will fire when DOM is loaded and ready
+    document.addEventListener("DOMContentLoaded", function (event) {
+        // Your code to run since DOM is loaded and ready
+
+        const AFFSettings = {
+            form: document.querySelector('#form-1'),
+            inputs: [
+                {
+                    element: document.querySelector('#input-1'),
+                    value: 'Jan'
+                },
+                {
+                    element: document.querySelector('#input-2'),
+                    value: 'jan.kowalski@email.com'
+                },
+                {
+                    element: document.querySelector('#input-3'),
+                    value: 'Hello world'
+                },
+                {
+                    element: document.querySelector('#select-1'),
+                    value: [2,5]
+                },
+                {
+                    element: document.querySelector('#checkbox-1'),
+                    value: true
+                },
+            ],
+            typing: {
+                submitOnFinish: false
+            }
+        };
+
+        try {
+            AFF.init(AFFSettings);
+        } catch (ex) {
+            console.log('AFF init error');
+        }
+
+        function runAFF() {
+            console.log('Running AFF...');
+            AFF.inputsFillIn();
+        }
+
+        document.querySelector('#aff-trigger').addEventListener('click', runAFF);
+    });
+
+    // self executing function, must be placed just before the closing body tag
+    (function () {
+        // AFF.init();
+    })();
+</script>
+</body>
+</html>
